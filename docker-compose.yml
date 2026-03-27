@@ -1,4 +1,16 @@
 services:
+  # The "Traffic Cop" - Handles all incoming web requests
+  nginx:
+    image: nginx:alpine
+    container_name: aws-practice-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
   db:
     image: postgres:16-alpine
     container_name: aws-practice-db
@@ -6,8 +18,7 @@ services:
       POSTGRES_DB: usersdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
+    # Port 5432 is removed from public access for security
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -25,8 +36,7 @@ services:
       DB_NAME: usersdb
     depends_on:
       - db
-    ports:
-      - "4000:4000"
+    # Port 4000 is removed; Nginx talks to this internally
 
   frontend:
     build:
@@ -34,8 +44,7 @@ services:
     container_name: aws-practice-frontend
     depends_on:
       - backend
-    ports:
-      - "5173:80"
+    # Port 5173/80 is removed; Nginx talks to this internally
 
 volumes:
   db_data:
