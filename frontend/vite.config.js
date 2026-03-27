@@ -1,6 +1,19 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()]
-});
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      // Intercept calls starting with /api
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        // Remove '/api' before sending to the backend
+        // So /api/users -> http://localhost:4000/users
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
+})

@@ -15,10 +15,11 @@ services:
     image: postgres:16-alpine
     container_name: aws-practice-db
     environment:
-      POSTGRES_DB: usersdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    # Port 5432 is removed from public access for security
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT_EXPOSE:-5432}:5432" # Maps 5432 only if needed
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -28,15 +29,14 @@ services:
       context: ./backend
     container_name: aws-practice-backend
     environment:
-      PORT: 4000
-      DB_HOST: db
+      PORT: ${BACKEND_PORT}
+      DB_HOST: ${DB_HOST}
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: usersdb
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     depends_on:
       - db
-    # Port 4000 is removed; Nginx talks to this internally
 
   frontend:
     build:
@@ -44,7 +44,6 @@ services:
     container_name: aws-practice-frontend
     depends_on:
       - backend
-    # Port 5173/80 is removed; Nginx talks to this internally
 
 volumes:
   db_data:
